@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>三位数玩法设置填写表</title>
+<style>
+:root{--bg:#0f1419;--card:#18212b;--line:#2b3744;--ink:#e8eef4;--dim:#93a3b1;--theme:#2fbf71;--warn:#e8a33d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif;padding:0 0 92px}
+header{padding:18px 16px 12px;border-bottom:1px solid var(--line);position:relative}
+h1{margin:0 0 6px;font-size:19px}
+h2{margin:24px 0 8px;font-size:16px;color:var(--theme)}
+p.note{margin:6px 0;color:var(--dim);font-size:13px}
+main{padding:0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0}
+.row{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .main{flex:1;min-width:0}
+.id{color:var(--dim);font-size:12px;font-variant-numeric:tabular-nums}
+.name{font-weight:600}
+.cond{color:var(--dim);font-size:13px;word-break:break-all}
+.cur{color:var(--warn);font-size:13px}
+input,select,textarea{background:#101922;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 10px;font:inherit;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--theme)}
+input.mult{width:96px;text-align:center;font-size:17px}
+.bad{border-color:#e05c5c!important}
+textarea{min-height:76px}
+.inline{display:flex;gap:8px;align-items:center}
+button{background:var(--theme);color:#06240f;border:0;border-radius:8px;padding:11px 14px;font:inherit;font-weight:700}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);font-weight:500}
+footer{position:fixed;left:0;right:0;bottom:0;background:#0b1116;border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px}
+footer button{flex:1}
+#out{white-space:pre-wrap;word-break:break-all;background:#0b1116;border:1px solid var(--line);border-radius:8px;padding:10px;font:12px/1.5 ui-monospace,Consolas,monospace;color:#cfe}
+.extra{border:1px dashed var(--line);border-radius:8px;padding:10px;margin:8px 0}
+label.small{display:block;color:var(--dim);font-size:12px;margin:8px 0 3px}
+.ok{color:var(--theme)}
+</style>
+</head>
+<body>
+<header>
+  <h1>三位数玩法设置填写表</h1>
+  <p class="note">按群规逐项填写。倍率填 <b>0～10000 的整数</b>；填 <b>0</b> 表示该牌型赢也不赔；<b>留空</b> 表示不配置（机器人不自动算，走人工核对）。</p>
+  <p class="note">规则项留空 = 沿用「当前」那一行。填完点底部「生成结果」，复制整段发回即可。</p>
+</header>
+
+<main>
+  <div class="card">
+    <label class="small">填表人</label><input id="filler" placeholder="名字">
+    <label class="small">群名 / 群规出处</label><input id="source" placeholder="例：XX群 群规置顶">
+    <label class="small">日期</label><input id="date" type="date">
+  </div>
+
+  <h2>A. 基础设置</h2>
+  <div class="card" id="secA"></div>
+
+  <h2>B. 牌型倍率（15 项全部要填）</h2>
+  <p class="note">末三位记作 abc，例：10.98 → 0 / 9 / 8。</p>
+  <div class="card" id="secB"></div>
+
+  <h2>C. 牌型大小排序</h2>
+  <div class="card">
+    <p class="cur">当前（小 → 大）：牛一 &lt; 牛二 &lt; 牛三 &lt; 牛四 &lt; 牛五 &lt; 牛六 &lt; 牛七 &lt; 牛八 &lt; 牛九 &lt; 牛牛 &lt; 金牛 &lt; 顺子/倒顺 &lt; 蛮牛 &lt; 豹子 &lt; 炸弹</p>
+    <label class="small">要改就按「小 → 大」重写一遍（留空＝沿用）</label>
+    <textarea id="order" placeholder="例：牛一 < 牛二 < … < 豹子 < 炸弹"></textarea>
+  </div>
+
+  <h2>D. 比牌规则</h2>
+  <div class="card" id="secD"></div>
+
+  <h2>E. 下注数字识别</h2>
+  <div class="card" id="secE"></div>
+
+  <h2>F. 需要人工核对的情况</h2>
+  <div class="card">
+    <p class="cur">当前：抢包/错包罚款、连续尾包、撤回争议、双注、庄提前领非尾包</p>
+    <label class="small">要增加或删除哪些（留空＝沿用）</label>
+    <textarea id="review" placeholder="例：加上『庄发错群的包』；去掉『双注』"></textarea>
+  </div>
+
+  <h2>G. 其他玩法（还要加别的玩法就填这里）</h2>
+  <div class="card">
+    <div id="plays"></div>
+    <button class="ghost" id="addPlay" type="button">＋ 再加一个玩法</button>
+  </div>
+
+  <h2>结果</h2>
+  <div class="card">
+    <div id="msg" class="note">点底部「生成结果」。</div>
+    <div id="out" hidden></div>
+  </div>
+</main>
+
+<footer>
+  <button class="ghost" id="fillCur" type="button">套用当前值</button>
+  <button id="gen" type="button">生成结果</button>
+  <button class="ghost" id="copy" type="button">复制</button>
+</footer>
+
+<script>
+const A=[
+ ['A1','最低下注','1','num','整数'],
+ ['A2','最高下注（上限）','30','num','整数'],
+ ['A3','红包金额有效范围','0.01 ~ 99.99 元','text','超出范围机器人不结算'],
+ ['A4','超时秒数','21（≥21 判超时）','text','20.999 秒按 20 秒算，不超时'],
+ ['A5','超时从什么时候起算','头包被领取的时刻','text','可改成「庄发包的时刻」'],
+ ['A6','红包没领完怎么算','按超时处理，闲家输','text',''],
+ ['A7','庄的尾包规则','庄默认认尾包','text',''],
+ ['A8','红包每份金额','2.00 元','text',''],
+ ['A9','红包额外附加金额','0.66 元','text','应发总额 = 份数 × A8 + A9'],
+ ['A10','份数是否含庄的尾包','含（7 份 14.66 元，10 份 20.66 元）','text',''],
+ ['A11','免死尾数','末三位 020（庄或闲命中即庄闲均和）','text','']
+];
+const B=[
+ ['B1','牛一',1,'三位相加个位 = 1','1.28、10.01','1'],
+ ['B2','牛二',2,'三位相加个位 = 2','0.29','2'],
+ ['B3','牛三',3,'三位相加个位 = 3','0.58','3'],
+ ['B4','牛四',4,'三位相加个位 = 4','0.76','4'],
+ ['B5','牛五',5,'三位相加个位 = 5','0.68','5'],
+ ['B6','牛六',6,'三位相加个位 = 6','0.69','6'],
+ ['B7','牛七',7,'三位相加个位 = 7','10.98','7'],
+ ['B8','牛八',8,'三位相加个位 = 8','0.89','8'],
+ ['B9','牛九',9,'三位相加个位 = 9','1.26','9'],
+ ['B10','牛牛',10,'三位相加个位 = 0','1.36','未配置'],
+ ['B11','金牛',12,'末三位是 0x0（首尾为 0、中间非 0）','0.10、0.90、10.10','12'],
+ ['B12','顺子/倒顺',13,'三位连续递增或递减','0.12、7.89、2.10、9.87','13'],
+ ['B13','蛮牛',14,'后两位是 00（整元）','1.00、10.00','14'],
+ ['B14','豹子',15,'末三位相同且非 0','1.11、9.99、12.22','15'],
+ ['B15','炸弹',16,'四位数且四位全同','11.11、99.99','未配置']
+];
+const D=[
+ ['D1','免死优先级','020 优先于超时和一切比牌，直接庄闲均和'],
+ ['D2','超时怎么判','闲家直接输，按庄家牌型的倍率赔'],
+ ['D3','牌型不同','牌型大的一方赢'],
+ ['D4','同牌型：牛一、牛二','庄赢'],
+ ['D5','同牌型：牛三及以上','比完整金额，金额大的赢'],
+ ['D6','同牌型且金额完全相同','庄赢'],
+ ['D7','赔付公式','下注额 × 胜方牌型倍率（庄闲零和）'],
+ ['D8','倍率没配置时','不自动结算，提示人工核对']
+];
+const E=[
+ ['E1','能识别的下注写法','整条消息只有一个 1～9 位整数，两端可带标点空格（「！30。」→ 30）'],
+ ['E2','识别不了的写法','押30、30元、10,20、1.5 → 弹窗要求人工填数字'],
+ ['E3','一个人一局算几条','1 条（重复勾选会报错）'],
+ ['E4','庄家本人下注','不计入'],
+ ['E5','超过上限（A2）怎么处理','要重新核对后才能出单']
+];
+const $=(s,r=document)=>r.querySelector(s);
+const el=(h)=>{const d=document.createElement('div');d.innerHTML=h.trim();return d.firstElementChild;};
+function rowRule(id,name,cur,ph){
+ return el(`<div class="row"><div class="main"><div><span class="id">${id}</span> <span class="name">${name}</span></div>
+ <div class="cur">当前：${cur}</div><input data-rule="${id}" data-name="${name}" data-cur="${cur}" placeholder="${ph||'要改就写在这里，留空＝沿用'}"></div></div>`);
+}
+A.forEach(([id,name,cur,kind,hint])=>{
+ const r=el(`<div class="row"><div class="main"><div><span class="id">${id}</span> <span class="name">${name}</span></div>
+ <div class="cur">当前：${cur}</div>${hint?`<div class="cond">${hint}</div>`:''}
+ <input data-a="${id}" data-name="${name}" data-cur="${cur}" ${kind==='num'?'inputmode="numeric"':''} placeholder="填写值（留空＝沿用）"></div></div>`);
+ $('#secA').appendChild(r);
+});
+B.forEach(([id,name,rank,cond,eg,def])=>{
+ const r=el(`<div class="row"><div class="main"><div><span class="id">${id}</span> <span class="name">${name}</span> <span class="id">rank ${rank}</span></div>
+ <div class="cond">${cond}　例：${eg}</div><div class="cur">原默认：${def}${def==='未配置'?'':' 倍'}</div></div>
+ <div><input class="mult" inputmode="numeric" data-mult="${rank}" data-name="${name}" data-cur="${def}" placeholder="倍率"></div></div>`);
+ $('#secB').appendChild(r);
+});
+D.forEach(([id,name,cur])=>$('#secD').appendChild(rowRule(id,name,cur)));
+E.forEach(([id,name,cur])=>$('#secE').appendChild(rowRule(id,name,cur)));
+
+function addPlay(){
+ const i=$('#plays').children.length+1;
+ $('#plays').appendChild(el(`<div class="extra"><div class="name">玩法 ${i}</div>
+ <label class="small">玩法名称</label><input data-play="name">
+ <label class="small">牌型 / 判定规则</label><textarea data-play="hands"></textarea>
+ <label class="small">各牌型倍率</label><textarea data-play="mult"></textarea>
+ <label class="small">比牌规则</label><textarea data-play="compare"></textarea>
+ <label class="small">红包规则（份数、金额、超时）</label><textarea data-play="packet"></textarea></div>`));
+}
+addPlay();
+$('#addPlay').onclick=addPlay;
+$('#date').valueAsDate=new Date();
+
+$('#fillCur').onclick=()=>{
+ document.querySelectorAll('[data-mult]').forEach(i=>{const c=i.dataset.cur;i.value=c==='未配置'?'':c;});
+ document.querySelectorAll('[data-a]').forEach(i=>{if(!i.value)i.value=i.dataset.cur;});
+ flash('已套用当前值，再按群规改动不一样的地方');
+};
+function flash(t,ok){const m=$('#msg');m.textContent=t;m.className=ok?'note ok':'note';}
+
+function multKey(rank){return rank===10?'three_bull_multiplier':rank===16?'three_bomb_multiplier':'three_mult_'+rank;}
+
+$('#gen').onclick=()=>{
+ let bad=0,blank=0;const mult={},multText=[];
+ document.querySelectorAll('[data-mult]').forEach(i=>{
+  const v=i.value.trim();i.classList.remove('bad');
+  if(v===''){blank++;multText.push(`${i.dataset.name}：未填`);return;}
+  if(!/^\d+$/.test(v)||+v>10000){i.classList.add('bad');bad++;multText.push(`${i.dataset.name}：${v}（无效）`);return;}
+  mult[multKey(+i.dataset.mult)]=+v;multText.push(`${i.dataset.name}：${v} 倍`);
+ });
+ if(bad){flash(`有 ${bad} 个倍率不合法：只能填 0～10000 的整数，已标红`);return;}
+ const base={},baseText=[];
+ document.querySelectorAll('[data-a]').forEach(i=>{const v=i.value.trim();
+  base[i.dataset.a]={项目:i.dataset.name,当前:i.dataset.cur,填写:v||'（沿用）'};
+  baseText.push(`${i.dataset.a} ${i.dataset.name}：${v||'沿用（'+i.dataset.cur+'）'}`);});
+ const rules={},rulesText=[];
+ document.querySelectorAll('[data-rule]').forEach(i=>{const v=i.value.trim();
+  rules[i.dataset.rule]={项目:i.dataset.name,当前:i.dataset.cur,改为:v||''};
+  if(v)rulesText.push(`${i.dataset.rule} ${i.dataset.name}：改为 ${v}`);});
+ const plays=[...$('#plays').children].map(box=>{
+  const g=k=>box.querySelector(`[data-play="${k}"]`).value.trim();
+  return{名称:g('name'),牌型:g('hands'),倍率:g('mult'),比牌:g('compare'),红包:g('packet')};
+ }).filter(p=>p.名称||p.牌型||p.倍率||p.比牌||p.红包);
+ const data={表格:'三位数设置填写表',填表人:$('#filler').value.trim(),群规出处:$('#source').value.trim(),日期:$('#date').value,
+  基础设置:base,牌型倍率:mult,倍率明细:multText,牌型排序:$('#order').value.trim(),比牌与识别:rules,
+  人工核对增删:$('#review').value.trim(),其他玩法:plays};
+ const text=['【三位数设置填写表】',
+  `填表人：${data.填表人||'未填'}　群规出处：${data.群规出处||'未填'}　日期：${data.日期}`,
+  '','A. 基础设置',...baseText,
+  '','B. 牌型倍率',...multText,
+  '','C. 牌型排序：'+(data.牌型排序||'沿用当前'),
+  '','D/E. 规则改动：'+(rulesText.length?'':'全部沿用'),...rulesText,
+  '','F. 人工核对增删：'+(data.人工核对增删||'沿用当前'),
+  '','G. 其他玩法：'+(plays.length?'':'无'),
+  ...plays.map((p,i)=>`玩法${i+1} ${p.名称}\n  牌型：${p.牌型}\n  倍率：${p.倍率}\n  比牌：${p.比牌}\n  红包：${p.红包}`),
+  '','----- 以下给机器人，不要改 -----',JSON.stringify(data,null,1)].join('\n');
+ $('#out').hidden=false;$('#out').textContent=text;
+ flash(blank?`已生成。注意还有 ${blank} 个牌型倍率没填（没填的会走人工核对）。点「复制」发回。`:'已生成，15 个牌型倍率都填好了。点「复制」发回。',!blank);
+ $('#out').scrollIntoView({behavior:'smooth',block:'start'});
+};
+
+$('#copy').onclick=async()=>{
+ const t=$('#out').textContent;
+ if(!t){flash('先点「生成结果」');return;}
+ try{await navigator.clipboard.writeText(t);flash('已复制，粘贴到微信发回即可',true);}
+ catch(e){const r=document.createRange();r.selectNodeContents($('#out'));const s=getSelection();s.removeAllRanges();s.addRange(r);flash('已选中，长按选择「复制」');}
+};
+</script>
+</body>
+</html>
