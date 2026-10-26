@@ -85,6 +85,15 @@ label.small{display:block;color:var(--dim);font-size:12px;margin:8px 0 3px}
     <button class="ghost" id="addPlay" type="button">＋ 再加一个玩法</button>
   </div>
 
+  <h2>H. 补充说明</h2>
+  <div class="card">
+    <p class="note">群规里有、但上面没问到的都写这里：特殊情况怎么判、哪些要罚款、谁说了算、例外的局、口头约定等。写多少都行。</p>
+    <label class="small">补充说明</label>
+    <textarea id="extraNote" style="min-height:140px" placeholder="例：庄连续三局尾包要换庄；节假日上限放到 50；红包封面错了按作废重发，不罚款。"></textarea>
+    <label class="small">举例说明（有争议的实际例子，写「金额 → 应该怎么判」最有用）</label>
+    <textarea id="extraCase" placeholder="例：庄 1.11、闲 1.11 → 庄赢；闲 10.20 → 免死均和"></textarea>
+  </div>
+
   <h2>结果</h2>
   <div class="card">
     <div id="msg" class="note">点底部「生成结果」。</div>
@@ -212,7 +221,8 @@ $('#gen').onclick=()=>{
  }).filter(p=>p.名称||p.牌型||p.倍率||p.比牌||p.红包);
  const data={表格:'三位数设置填写表',填表人:$('#filler').value.trim(),群规出处:$('#source').value.trim(),日期:$('#date').value,
   基础设置:base,牌型倍率:mult,倍率明细:multText,牌型排序:$('#order').value.trim(),比牌与识别:rules,
-  人工核对增删:$('#review').value.trim(),其他玩法:plays};
+  人工核对增删:$('#review').value.trim(),其他玩法:plays,
+  补充说明:$('#extraNote').value.trim(),举例说明:$('#extraCase').value.trim()};
  const text=['【三位数设置填写表】',
   `填表人：${data.填表人||'未填'}　群规出处：${data.群规出处||'未填'}　日期：${data.日期}`,
   '','A. 基础设置',...baseText,
@@ -222,6 +232,8 @@ $('#gen').onclick=()=>{
   '','F. 人工核对增删：'+(data.人工核对增删||'沿用当前'),
   '','G. 其他玩法：'+(plays.length?'':'无'),
   ...plays.map((p,i)=>`玩法${i+1} ${p.名称}\n  牌型：${p.牌型}\n  倍率：${p.倍率}\n  比牌：${p.比牌}\n  红包：${p.红包}`),
+  '','H. 补充说明：'+(data.补充说明||'无'),
+  '举例说明：'+(data.举例说明||'无'),
   '','----- 以下给机器人，不要改 -----',JSON.stringify(data,null,1)].join('\n');
  $('#out').hidden=false;$('#out').textContent=text;
  flash(blank?`已生成。注意还有 ${blank} 个牌型倍率没填（没填的会走人工核对）。点「复制」发回。`:'已生成，15 个牌型倍率都填好了。点「复制」发回。',!blank);
