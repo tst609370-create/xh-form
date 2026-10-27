@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>星海云机器人功能修改意见表</title>
+<style>
+:root{--bg:#0f1419;--card:#18212b;--line:#2b3744;--ink:#e8eef4;--dim:#93a3b1;--theme:#2fbf71;--warn:#e8a33d;--red:#e05c5c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif;padding:0 0 92px}
+header{padding:18px 16px 12px;border-bottom:1px solid var(--line)}
+h1{margin:0 0 6px;font-size:19px}
+h2{margin:24px 0 8px;font-size:16px;color:var(--theme)}
+p.note{margin:6px 0;color:var(--dim);font-size:13px}
+main{padding:0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0}
+.row{padding:10px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.id{color:var(--dim);font-size:12px;font-variant-numeric:tabular-nums}
+.name{font-weight:600}
+.cur{color:var(--dim);font-size:13px}
+.pick{display:flex;gap:6px;margin-top:8px}
+.pick label{flex:1;text-align:center;border:1px solid var(--line);border-radius:8px;padding:6px 0;font-size:13px;color:var(--dim);cursor:pointer}
+.pick input{display:none}
+.pick input:checked+span{color:var(--ink)}
+.pick label.on-keep{border-color:var(--line);background:#101922;color:var(--ink)}
+.pick label.on-change{border-color:var(--warn);background:#3a2c12;color:var(--ink)}
+.pick label.on-drop{border-color:var(--red);background:#3a1717;color:var(--ink)}
+input,textarea{background:#101922;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 10px;font:inherit;width:100%}
+input:focus,textarea:focus{outline:none;border-color:var(--theme)}
+textarea{min-height:70px;margin-top:8px}
+.row textarea{display:none}
+.row.open textarea{display:block}
+button{background:var(--theme);color:#06240f;border:0;border-radius:8px;padding:11px 14px;font:inherit;font-weight:700}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);font-weight:500}
+footer{position:fixed;left:0;right:0;bottom:0;background:#0b1116;border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px}
+footer button{flex:1}
+#out{white-space:pre-wrap;word-break:break-all;background:#0b1116;border:1px solid var(--line);border-radius:8px;padding:10px;font:12px/1.5 ui-monospace,Consolas,monospace;color:#cfe}
+label.small{display:block;color:var(--dim);font-size:12px;margin:8px 0 3px}
+.ok{color:var(--theme)}
+</style>
+</head>
+<body>
+<header>
+  <h1>星海云机器人功能修改意见表</h1>
+  <p class="note">下面是机器人现有的全部功能。每项选一个：<b>不改</b> / <b>要改</b> / <b>不要了</b>。选「要改」或「不要了」会出现输入框，写清楚想要的效果，最好举一个例子（例：报 500、上限 300，应该认多少）。</p>
+  <p class="note">表里没有、想新增的功能，写在最后一栏。填完点底部「生成结果」，复制整段发回即可。</p>
+  <p class="note" style="color:var(--warn)">请不要截图、不要分多条发：每条意见写在对应功能下面，最后一次性复制发回。</p>
+</header>
+
+<main>
+  <div class="card">
+    <label class="small">填表人</label><input id="filler" placeholder="名字">
+    <label class="small">群名</label><input id="group" placeholder="例：XX群">
+    <label class="small">日期</label><input id="date" type="date">
+  </div>
+  <div id="sections"></div>
+
+  <h2>新增功能</h2>
+  <div class="card">
+    <label class="small">表里没有、想新增的功能（一条一行，写清楚效果和例子）</label>
+    <textarea id="newFeat" style="display:block;min-height:110px"></textarea>
+  </div>
+
+  <h2>结果</h2>
+  <div class="card"><div id="out">点底部「生成结果」</div></div>
+</main>
+
+<footer>
+  <button class="ghost" id="gen">生成结果</button>
+  <button id="copy">复制结果</button>
+</footer>
+
+<script>
+const S=[
+['A','安装与授权',[
+ ['A1','扫码安装、一键配置','扫码下载安装，先检查 Root，再自动配置通知、悬浮窗等权限；配置不成功才提示手动设置'],
+ ['A2','机器码登记与激活','首次打开自动上报机器码，后台激活后才能使用'],
+ ['A3','授权到期显示与续期','标题栏显示到期日，到期前在后台续期'],
+ ['A4','应用内更新','有新版本时提示，扫码或应用内覆盖更新'],
+ ['A5','更新后保留数据','覆盖更新保留原有设置、账单和积分'],
+ ['A6','开机自启','手机重启后机器人自动运行']
+]],
+['B','绑定微信与群',[
+ ['B1','绑定本机微信','主页点「绑定」，本机微信分配编号（001 起）'],
+ ['B2','解绑 / 换号','解绑后可绑新微信；旧编号和流水保留'],
+ ['B3','绑定游戏群','先在微信打开目标群，再点「绑定群」；只能有一个游戏群，再点一次可切换'],
+ ['B4','绑定财务群','设置 → 群聊里绑定，用于接收结算图'],
+ ['B5','绑定管理群 / 拉手群','设置 → 群聊里绑定'],
+ ['B6','群名显示','自动读取群顶部标题（带人数）显示在主页'],
+ ['B7','换群限制','原群这一局没结算完，不能在新群开局；期数、积分、账单换群后接着算']
+]],
+['C','庄家与账号',[
+ ['C1','设庄','选择庄家微信；中途换庄从下一局生效'],
+ ['C2','庄表情指令','庄家在游戏群发指定表情，就能开始 / 停止 / 结算；重复发送不处理'],
+ ['C3','账号编号与标签','每个账号有编号，标签有庄 / 玩家 / 财务 / 管理 / 机器；编号不能手填'],
+ ['C4','首次报号自动编号','玩家第一次有效报号，自动编号并标为「玩家」'],
+ ['C5','庄总号','一个总号下可归多个微信，合计今日坐庄局数、输赢和剩余积分'],
+ ['C6','按编号添加微信','输入编号显示真实昵称，确认后加入'],
+ ['C7','加减分','手动给账号加分或减分，可写备注；不算游戏输赢']
+]],
+['D','玩法设置',[
+ ['D1','玩法切换','三位数 / 牛牛两种玩法，各自保存设置'],
+ ['D2','最低 / 最高下注','低于最低不认，高于最高按最高算（三位数默认 5 / 30）'],
+ ['D3','快捷最高限注','侧栏一键改最高限注：200 / 300 / 500 / 600 / 1000 或自定义；认注单确认前改，当局生效'],
+ ['D4','牌型倍率','三位数共 15 项牌型倍率可设（牛一～牛九、牛牛、金牛、顺子、蛮牛、豹子、炸弹）'],
+ ['D5','比牌规则','三位数：牛一、牛二同点庄赢；牛三起同点比完整金额，金额相同庄赢'],
+ ['D6','020 免死','末三位 020，庄闲都算和'],
+ ['D7','21 秒超时','从头包被领取起，超过 21 秒算超时；没领的也算超时'],
+ ['D8','牛一同点庄赢（牛牛玩法）','开：双方牛一时庄赢；关：打和'],
+ ['D9','0.01 不计输赢（牛牛玩法）','开：领到 0.01 的这笔输赢为 0'],
+ ['D10','发包金额','份数 = 下注人数 + 1（含庄尾包），每份 2 元另加 0.66 元，例：7 份 14.66'],
+ ['D11','抽水','庄家盈利抽水、玩家盈利抽水，可分别设置'],
+ ['D12','设置生效时间','普通设置保存后，下一局生效']
+]],
+['E','自动模式（一局流程）',[
+ ['E1','开始','点「开始」或庄发开始表情，向群里发开始公告'],
+ ['E2','下注识别','整条消息只有一个数字才认，两边可带标点；带文字、多个数字、小数不认'],
+ ['E3','同人多次报号','同一个人只认最后一次'],
+ ['E4','庄家的数字','庄家发的数字不算下注'],
+ ['E5','实时下注显示','侧栏显示「下注中 · N 人 · 合计 X」'],
+ ['E6','撤回','认注单确认前撤回，这笔不算；确认后撤回只标记，不改金额'],
+ ['E7','点头像手动认注','确认前可点群成员头像，手动加入本局并填金额'],
+ ['E8','补录认注','漏开局或漏报号时，从已保存的消息里勾选补进本局'],
+ ['E9','停止与认注单预览','点「停止」后打开认注单，可修改、删除每一笔'],
+ ['E10','出单','发认注单到群里（图片或文字），写明应发红包金额和份数'],
+ ['E11','自动结算','庄发红包后，自动读取红包领取明细并结算'],
+ ['E12','读取红包（补救）','自动读不到明细时，手动点「读取红包」'],
+ ['E13','本局核对','并列尾包、错抢、代抢、超时、废包等，人工裁定并写依据'],
+ ['E14','错抢处理（牛牛玩法）','抢错的人赔庄家，另付群主 500；下注人不计输赢'],
+ ['E15','下注了没领','算「认尾 · 未领 · 无输赢」，输赢为 0，仍上账单'],
+ ['E16','没下注抢了包','账单单独列出，不当作下注'],
+ ['E17','清空','清掉当前没结算的这一局，聊天记录不删']
+]],
+['F','手动模式',[
+ ['F1','五步主按钮','开始 → 停止 → 出单 → 提取红包 → 结算，一个按钮按步骤走'],
+ ['F2','本局全选','停止后自动勾选开始到停止之间的所有报号（排除本机、庄家、撤回、已用过的）'],
+ ['F3','微信里多选勾选','在微信聊天里长按多选，勾选的消息就是下注'],
+ ['F4','补填数字','勾选的消息认不出金额时弹窗，让你手动填数字'],
+ ['F5','同人多注','同一个人勾了多条，按发送时间只认最后一条'],
+ ['F6','提取红包','读取本局红包明细，翻过页的也能读全'],
+ ['F7','同秒尾包选择','多人同一秒领到时，弹窗让你选哪个是尾包'],
+ ['F8','整局核对','结算前核对整局，可「返回修改」'],
+ ['F9','结算预览','结算后先看可编辑的预览，点「出单」才发图'],
+ ['F10','按群保存草稿','换群再换回来，原来勾选的内容还在'],
+ ['F11','修改下注 / 最高限注 / 清空','侧栏辅助按钮']
+]],
+['G','账单与发送',[
+ ['G1','结算图','结算后生成图片，保存到相册，先预览再发'],
+ ['G2','发到游戏群','确认后发到游戏群'],
+ ['G3','发到财务群','开关默认关；开了以后同时发到财务群，每个群只发一次'],
+ ['G4','账单显示玩家余额','开关：账单上显示下注玩家的当前余额'],
+ ['G5','余额名单跨天跨群保留','开关：余额名单不按当天、当前群过滤'],
+ ['G6','本庄跨天累计','开关：账单显示同一庄连续坐庄的累计输赢'],
+ ['G7','清空累计','可分别清空「总输赢累计」和「本庄累计输赢」，从清空后重新累计'],
+ ['G8','账单样式','账单标题、品牌、页脚、广告图、走势图可设置'],
+ ['G9','开始 / 停止文案','开局、停止时发到群里的文字可自定义'],
+ ['G10','已结算改账','已结算的局可整单修改，庄闲差额自动配平']
+]],
+['H','统计与导出',[
+ ['H1','庄家输赢汇总','按日期导出今日 / 历史庄家输赢（图片 / 表格 / 文字）'],
+ ['H2','账号历史','按账号和日期查看、导出输赢和加减分'],
+ ['H3','庄统计','显示今日坐庄成绩和剩余积分'],
+ ['H4','期数','期数按本机连续编号，换群不重新开始']
+]],
+['I','悬浮窗与界面',[
+ ['I1','悬浮球 / 面板','可拖动、缩放、全屏 / 小窗切换'],
+ ['I2','侧栏按钮','开始 / 停止 / 结算等按钮，当前该点的那个高亮'],
+ ['I3','底部导航','主页、统计、设置、玩法四个页面'],
+ ['I4','顶部提示','操作结果在顶部提示，带状态图标'],
+ ['I5','开关样式','开显示亮绿「· 开」，关显示亮红「· 关」'],
+ ['I6','面板透明度','默认 97% 不透明']
+]],
+['J','数据与后台',[
+ ['J1','设置云同步','设置可上传到后台，换机或重装后恢复'],
+ ['J2','数据备份与恢复','账单、积分数据可备份和导入'],
+ ['J3','远程诊断','出问题时后台可查看本机日志定位原因']
+]]
+];
+const $=(s,r=document)=>r.querySelector(s);
+const el=h=>{const d=document.createElement('div');d.innerHTML=h.trim();return d.firstElementChild;};
+const PICK=[['keep','不改'],['change','要改'],['drop','不要了']];
+S.forEach(([sid,title,items])=>{
+ $('#sections').appendChild(el(`<h2>${sid}. ${title}</h2>`));
+ const card=el('<div class="card"></div>');
+ items.forEach(([id,name,cur])=>{
+  const r=el(`<div class="row" data-id="${id}" data-name="${name}"><div><span class="id">${id}</span> <span class="name">${name}</span></div>
+  <div class="cur">现在：${cur}</div>
+  <div class="pick">${PICK.map(([v,t])=>`<label${v==='keep'?' class="on-keep"':''}><input type="radio" name="p_${id}" value="${v}"${v==='keep'?' checked':''}><span>${t}</span></label>`).join('')}</div>
+  <textarea placeholder="想要的效果，最好举个例子"></textarea></div>`);
+  r.querySelectorAll('input[type=radio]').forEach(inp=>inp.onchange=()=>{
+   r.querySelectorAll('.pick label').forEach(l=>l.className='');
+   inp.parentElement.className='on-'+inp.value;
+   r.classList.toggle('open',inp.value!=='keep');
+  });
+  card.appendChild(r);
+ });
+ $('#sections').appendChild(card);
+});
+$('#date').valueAsDate=new Date();
+
+function gen(){
+ const L=['【星海云功能修改意见】','填表人：'+($('#filler').value.trim()||'未填'),'群名：'+($('#group').value.trim()||'未填'),'日期：'+$('#date').value,''];
+ let n=0;
+ document.querySelectorAll('.row[data-id]').forEach(r=>{
+  const v=r.querySelector('input[type=radio]:checked').value;
+  if(v==='keep')return;
+  n++;
+  const t=r.querySelector('textarea').value.trim();
+  L.push(`${r.dataset.id} ${r.dataset.name}【${v==='change'?'要改':'不要了'}】`+(t?'：'+t:''));
+ });
+ if(!n)L.push('现有功能：全部不改');
+ const nf=$('#newFeat').value.trim();
+ if(nf){L.push('','【新增功能】');nf.split('\n').map(s=>s.trim()).filter(Boolean).forEach((s,i)=>L.push((i+1)+'. '+s));}
+ const txt=L.join('\n');
+ $('#out').textContent=txt;
+ return txt;
+}
+$('#gen').onclick=()=>{gen();$('#out').scrollIntoView({behavior:'smooth'});};
+$('#copy').onclick=async()=>{
+ const txt=gen();
+ try{await navigator.clipboard.writeText(txt);}
+ catch(e){const t=document.createElement('textarea');t.value=txt;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();}
+ $('#copy').textContent='已复制';setTimeout(()=>$('#copy').textContent='复制结果',1500);
+};
+</script>
+</body>
+</html>
